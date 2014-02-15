@@ -15,7 +15,7 @@ class PowerGenerator(object):
         self.running = False
 
 
-class BHKW(PowerGenerator):
+class CogenerationUnit(PowerGenerator):
 
     def __init__(self, env, heat_storage):
         PowerGenerator.__init__(self, env)
@@ -67,16 +67,16 @@ class BHKW(PowerGenerator):
         return current_thermal_production
 
     def update(self):
-        self.env.log('Starting BHKW...')
+        self.env.log('Starting cogeneration unit...')
         self.start()
         while True:
             if self.running:
-                self.env.log('BHKW workload:', '%f %%' % self.get_workload(), 'Total:', '%f kWh (%f Euro)' %
+                self.env.log('CU workload:', '%f %%' % self.get_workload(), 'Total:', '%f kWh (%f Euro)' %
                     (self.total_gas_consumption, self.total_gas_consumption * GAS_PRICE_PER_KWH))
                 if self.get_workload() > 0:
                     self.heat_storage.add_energy(self.get_thermal_power(True))
             else:
-                self.env.log('BHKW stopped.')
+                self.env.log('Cogeneration unit stopped')
             yield self.env.timeout(3600)
 
 

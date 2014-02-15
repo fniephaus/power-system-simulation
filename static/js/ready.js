@@ -1,8 +1,8 @@
 var systems_units = {
-    bhkw_workload: '%',
-    bhkw_electrical_power: 'kW',
-    bhkw_thermal_power: 'kW',
-    bhkw_total_gas_consumption: 'kWh',
+    cu_workload: '%',
+    cu_electrical_power: 'kW',
+    cu_thermal_power: 'kW',
+    cu_total_gas_consumption: 'kWh',
     hs_level: '%',
     plb_workload: '%',
     plb_thermal_power: 'kW',
@@ -11,7 +11,7 @@ var systems_units = {
 };
 
 var series_data = [{
-    name: 'bhkw_workload',
+    name: 'cu_workload',
     data: [],
     tooltip: {
         valueSuffix: ' %'
@@ -53,7 +53,7 @@ $(function(){
         $.getJSON( "./api/data/", function( data ) {
             for (var i = 0; i < data['time'].length; i++) {
                 var timestamp = get_timestamp(data['time'][i]);
-                series_data[0]['data'].push([timestamp, parseFloat(data['bhkw_workload'][i])]);
+                series_data[0]['data'].push([timestamp, parseFloat(data['cu_workload'][i])]);
                 series_data[1]['data'].push([timestamp, parseFloat(data['plb_workload'][i])]);
                 series_data[2]['data'].push([timestamp, parseFloat(data['hs_level'][i])]);
                 series_data[3]['data'].push([timestamp, parseFloat(data['thermal_consumption'][i])]);
@@ -110,7 +110,7 @@ function update_diagram(data){
     new_data = [[], [], [], []];
     for (var i = 0; i < data['time'].length; i++) {
         var timestamp = get_timestamp(data['time'][i]);
-        new_data[0].push([timestamp, data['bhkw_workload'][i]]);
+        new_data[0].push([timestamp, data['cu_workload'][i]]);
         new_data[1].push([timestamp, data['plb_workload'][i]]);
         new_data[2].push([timestamp, data['hs_level'][i]]);
         new_data[3].push([timestamp, data['thermal_consumption'][i]]);

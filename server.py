@@ -8,15 +8,15 @@ from functools import update_wrapper
 from werkzeug.serving import run_simple
 app = Flask(__name__)
 
-from simulation import env, heat_storage, bhkw, plb, thermal
+from simulation import env, heat_storage, cu, plb, thermal
 
 CACHE_LIMIT = 24 * 30  # 30 days
 
 time_values = collections.deque(maxlen=CACHE_LIMIT)
-bhkw_workload_values = collections.deque(maxlen=CACHE_LIMIT)
-bhkw_electrical_power_values = collections.deque(maxlen=CACHE_LIMIT)
-bhkw_thermal_power_values = collections.deque(maxlen=CACHE_LIMIT)
-bhkw_total_gas_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
+cu_workload_values = collections.deque(maxlen=CACHE_LIMIT)
+cu_electrical_power_values = collections.deque(maxlen=CACHE_LIMIT)
+cu_thermal_power_values = collections.deque(maxlen=CACHE_LIMIT)
+cu_total_gas_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
 plb_workload_values = collections.deque(maxlen=CACHE_LIMIT)
 plb_thermal_power_values = collections.deque(maxlen=CACHE_LIMIT)
 plb_total_gas_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
@@ -57,10 +57,10 @@ def index():
 def get_data():
     return jsonify({
         'time': list(time_values),
-        'bhkw_workload': list(bhkw_workload_values),
-        'bhkw_electrical_power': list(bhkw_electrical_power_values),
-        'bhkw_thermal_power': list(bhkw_thermal_power_values),
-        'bhkw_total_gas_consumption': list(bhkw_total_gas_consumption_values),
+        'cu_workload': list(cu_workload_values),
+        'cu_electrical_power': list(cu_electrical_power_values),
+        'cu_thermal_power': list(cu_thermal_power_values),
+        'cu_total_gas_consumption': list(cu_total_gas_consumption_values),
         'plb_workload': list(plb_workload_values),
         'plb_thermal_power': list(plb_thermal_power_values),
         'plb_total_gas_consumption': list(plb_total_gas_consumption_values),
@@ -79,9 +79,9 @@ def get_settings():
         'hs_capacity': heat_storage.capacity,
         'hs_target_energy': heat_storage.target_energy,
         'hs_undersupplied_threshold': heat_storage.undersupplied_threshold,
-        'bhkw_max_gas_input': bhkw.max_gas_input,
-        'bhkw_minimal_workload': bhkw.minimal_workload,
-        'bhkw_noise': 1 if bhkw.noise else 0,
+        'cu_max_gas_input': cu.max_gas_input,
+        'cu_minimal_workload': cu.minimal_workload,
+        'cu_noise': 1 if cu.noise else 0,
         'plb_max_gas_input': plb.max_gas_input,
         'sim_forward': '',
     })
@@ -103,12 +103,12 @@ def set_data():
     if 'hs_undersupplied_threshold' in request.form:
         heat_storage.undersupplied_threshold = float(
             request.form['hs_undersupplied_threshold'])
-    if 'bhkw_max_gas_input' in request.form:
-        bhkw.max_gas_input = float(request.form['bhkw_max_gas_input'])
-    if 'bhkw_minimal_workload' in request.form:
-        bhkw.minimal_workload = float(request.form['bhkw_minimal_workload'])
-    if 'bhkw_noise' in request.form:
-        bhkw.noise = request.form['bhkw_noise'] == "1"
+    if 'cu_max_gas_input' in request.form:
+        cu.max_gas_input = float(request.form['cu_max_gas_input'])
+    if 'cu_minimal_workload' in request.form:
+        cu.minimal_workload = float(request.form['cu_minimal_workload'])
+    if 'cu_noise' in request.form:
+        cu.noise = request.form['cu_noise'] == "1"
     if 'sim_forward' in request.form and request.form['sim_forward'] != "":
         env.forward = float(request.form['sim_forward']) * 60 * 60
     if 'plb_max_gas_input' in request.form:
@@ -121,9 +121,9 @@ def set_data():
         'hs_capacity': heat_storage.capacity,
         'hs_target_energy': heat_storage.target_energy,
         'hs_undersupplied_threshold': heat_storage.undersupplied_threshold,
-        'bhkw_max_gas_input': bhkw.max_gas_input,
-        'bhkw_minimal_workload': bhkw.minimal_workload,
-        'bhkw_noise': 1 if bhkw.noise else 0,
+        'cu_max_gas_input': cu.max_gas_input,
+        'cu_minimal_workload': cu.minimal_workload,
+        'cu_noise': 1 if cu.noise else 0,
         'plb_max_gas_input': plb.max_gas_input,
         'sim_forward': '',
     })
@@ -131,11 +131,11 @@ def set_data():
 
 def append_measurement():
     time_values.append(env.get_time())
-    bhkw_workload_values.append(round(bhkw.get_workload(), 2))
-    bhkw_electrical_power_values.append(round(bhkw.get_electrical_power(), 2))
-    bhkw_thermal_power_values.append(round(bhkw.get_thermal_power(), 2))
-    bhkw_total_gas_consumption_values.append(
-        round(bhkw.total_gas_consumption, 2))
+    cu_workload_values.append(round(cu.get_workload(), 2))
+    cu_electrical_power_values.append(round(cu.get_electrical_power(), 2))
+    cu_thermal_power_values.append(round(cu.get_thermal_power(), 2))
+    cu_total_gas_consumption_values.append(
+        round(cu.total_gas_consumption, 2))
     plb_workload_values.append(round(plb.get_workload(), 2))
     plb_thermal_power_values.append(round(plb.get_thermal_power(), 2))
     plb_total_gas_consumption_values.append(
