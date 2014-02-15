@@ -1,28 +1,27 @@
-from threading import Thread
+import sys
 import time
+import collections
+from threading import Thread
 
 from flask import Flask, jsonify, make_response, render_template, request
 from functools import update_wrapper
 from werkzeug.serving import run_simple
 app = Flask(__name__)
 
-
 from simulation import env, heat_storage, bhkw, plb, thermal
-import collections
 
-measurements_limit = 24 * 30  # 30 days
+CACHE_LIMIT = 24 * 30  # 30 days
 
-time_values = collections.deque(maxlen=measurements_limit)
-bhkw_workload_values = collections.deque(maxlen=measurements_limit)
-bhkw_electrical_power_values = collections.deque(maxlen=measurements_limit)
-bhkw_thermal_power_values = collections.deque(maxlen=measurements_limit)
-bhkw_total_gas_consumption_values = collections.deque(
-    maxlen=measurements_limit)
-plb_workload_values = collections.deque(maxlen=measurements_limit)
-plb_thermal_power_values = collections.deque(maxlen=measurements_limit)
-plb_total_gas_consumption_values = collections.deque(maxlen=measurements_limit)
-hs_level_values = collections.deque(maxlen=measurements_limit)
-thermal_consumption_values = collections.deque(maxlen=measurements_limit)
+time_values = collections.deque(maxlen=CACHE_LIMIT)
+bhkw_workload_values = collections.deque(maxlen=CACHE_LIMIT)
+bhkw_electrical_power_values = collections.deque(maxlen=CACHE_LIMIT)
+bhkw_thermal_power_values = collections.deque(maxlen=CACHE_LIMIT)
+bhkw_total_gas_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
+plb_workload_values = collections.deque(maxlen=CACHE_LIMIT)
+plb_thermal_power_values = collections.deque(maxlen=CACHE_LIMIT)
+plb_total_gas_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
+hs_level_values = collections.deque(maxlen=CACHE_LIMIT)
+thermal_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
 
 
 def crossdomain(origin=None):
@@ -139,13 +138,15 @@ def append_measurement():
         round(bhkw.total_gas_consumption, 2))
     plb_workload_values.append(round(plb.get_workload(), 2))
     plb_thermal_power_values.append(round(plb.get_thermal_power(), 2))
-    plb_total_gas_consumption_values.append(round(plb.total_gas_consumption, 2))
+    plb_total_gas_consumption_values.append(
+        round(plb.total_gas_consumption, 2))
     hs_level_values.append(round(heat_storage.level(), 2))
     thermal_consumption_values.append(round(thermal.get_consumption(), 2))
 
 if __name__ == '__main__':
     sim = Simulation(env)
-    env.quiet = True
+    if len(sys.argv) > 1:
+        env.verbose = True
     env.step_function = append_measurement
     sim.start()
     app.run(host="0.0.0.0", debug=True, port=7000, use_reloader=False)

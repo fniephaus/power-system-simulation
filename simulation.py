@@ -2,11 +2,11 @@ import math
 import simpy
 from simpy.util import start_delayed
 
-from env import ForwardableRealtimeEnvironment
+from environment import ForwardableRealtimeEnvironment
 
-from producers import BHKW, PeakLoadBoiler
-from storages import HeatStorage
-from consumers import ThermalConsumer
+from systems.producers import BHKW, PeakLoadBoiler
+from systems.storages import HeatStorage
+from systems.consumers import ThermalConsumer
 
 # initialize real-time environment
 env = ForwardableRealtimeEnvironment(

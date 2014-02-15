@@ -1,8 +1,6 @@
 import math
 import random
 
-from helpers import log
-
 
 class ThermalConsumer():
 
@@ -24,7 +22,8 @@ class ThermalConsumer():
         current_consumption = self.average_demand + variation
 
         if self.noise:
-            current_consumption += self.varying_demand * (random.random() - 0.5)
+            current_consumption += self.varying_demand * \
+                (random.random() - 0.5)
 
         if consider_consumed:
             self.total_consumption += current_consumption
@@ -34,7 +33,7 @@ class ThermalConsumer():
         while True:
             consumption = self.get_consumption()
             self.heat_storage.consume_energy(consumption)
-            log(self.env, 'Thermal demand:', '%f kW' % consumption)
-            log(self.env, 'HS energy stored:', '%f kWh' %
+            self.env.log('Thermal demand:', '%f kW' % consumption)
+            self.env.log('HS level:', '%f kWh' %
                 self.heat_storage.energy_stored())
             yield self.env.timeout(3600)

@@ -1,9 +1,6 @@
 import random
 
-from helpers import log
-
-gas_price_per_kwh = 0.0655
-
+GAS_PRICE_PER_KWH = 0.0655
 
 class PowerGenerator(object):
 
@@ -70,16 +67,16 @@ class BHKW(PowerGenerator):
         return current_thermal_production
 
     def update(self):
-        log(self.env, 'Starting BHKW...')
+        self.env.log('Starting BHKW...')
         self.start()
         while True:
             if self.running:
-                log(self.env, 'BHKW workload:', '%f %%' % self.get_workload(), 'Total:', '%f kWh (%f Euro)' %
-                    (self.total_gas_consumption, self.total_gas_consumption * gas_price_per_kwh))
+                self.env.log('BHKW workload:', '%f %%' % self.get_workload(), 'Total:', '%f kWh (%f Euro)' %
+                    (self.total_gas_consumption, self.total_gas_consumption * GAS_PRICE_PER_KWH))
                 if self.get_workload() > 0:
                     self.heat_storage.add_energy(self.get_thermal_power(True))
             else:
-                log(self.env, 'BHKW stopped.')
+                self.env.log('BHKW stopped.')
             yield self.env.timeout(3600)
 
 
@@ -121,17 +118,17 @@ class PeakLoadBoiler(PowerGenerator):
         return current_thermal_production
 
     def update(self):
-        log(self.env, 'Starting PLB...')
+        self.env.log('Starting PLB...')
         self.start()
         while True:
             self.analyze_demand()
             if self.running:
-                log(self.env, 'PLB workload:', '%f %%' % self.get_workload(), 'Total:', '%f kWh (%f Euro)' %
-                   (self.total_gas_consumption, self.total_gas_consumption * gas_price_per_kwh))
+                self.env.log('PLB workload:', '%f %%' % self.get_workload(), 'Total:', '%f kWh (%f Euro)' %
+                   (self.total_gas_consumption, self.total_gas_consumption * GAS_PRICE_PER_KWH))
                 if self.get_workload() > 0:
                     self.heat_storage.add_energy(self.get_thermal_power(True))
             else:
-                log(self.env, 'PLB stopped.')
+                self.env.log('PLB stopped.')
 
-            log(self.env, '=' * 80)
+            self.env.log('=' * 80)
             yield self.env.timeout(3600)
