@@ -1,4 +1,4 @@
 power-system-simulation
 =======================
 
-Simulation of the interaction between a thermal power system, peak load boiler and heat storage.
+Simulation of the interaction between a cogeneration unit, peak load boiler and heat storage.
