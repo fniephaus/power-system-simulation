@@ -35,14 +35,5 @@ nosetests.xml
 .project
 .pydevproject
 
-*sftp-config.json
-*sftp-config-alt.json
-
-*.sublime-workspace
-*.sublime-project
-*.log
-
-
-
-
-sftp-config-alt2.json
+*sftp-config*.json
+*.sublime-*
