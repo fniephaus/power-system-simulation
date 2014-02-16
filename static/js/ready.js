@@ -148,7 +148,7 @@ function get_timestamp(string){
 
 function initialize_daily_thermal_demand(){
     for(var i = 0; i < 24; i++) {
-        $("#daily_thermal_demand").append("<span id='daily_thermal_demand_" + i + "' class='slider'></span>");
+        $("#daily_thermal_demand").append("<span id='daily_thermal_demand_" + i + "' class='slider'><span>" + i + "</span></span>");
     }
     $( ".slider" ).slider({
         value: 0,
