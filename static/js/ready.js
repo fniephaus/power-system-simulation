@@ -196,11 +196,11 @@ function initialize_daily_thermal_demand(){
 function initialize_settings_panel(){
     $('#settings_accordion').on('hide.bs.collapse', function () {
         var chart = $('#simulation_diagram').highcharts();
-        chart.setSize(chart.width, 600, doAnimation = true);
+        chart.setSize(chart.width, 750, doAnimation = true);
     });
     $('#settings_accordion').on('show.bs.collapse', function () {
         var chart = $('#simulation_diagram').highcharts();
-        chart.setSize(chart.width, 200, doAnimation = true);
+        chart.setSize(chart.width, 300, doAnimation = true);
     });
 }
 
@@ -213,6 +213,9 @@ function initialize_diagram(){
     
     // Create the chart
     $('#simulation_diagram').highcharts('StockChart', {
+        chart: {
+            height: 300
+        },
         rangeSelector: {
             buttons: [{
                 count: 6,
