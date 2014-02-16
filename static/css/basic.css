@@ -1,10 +1,6 @@
 html, body {
 }
 
-#footer {
-    text-align: right;
-}
-
 .svg_container {
     display: inline-block;
     position: relative;
