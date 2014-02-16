@@ -45,10 +45,10 @@ $(function(){
         $("#simulation_scheme").append(svg_item);
     }, "xml");
 
+    initialize_daily_thermal_demand();
+
     $.getJSON( "./api/settings/", function( data ) {
-        $.each(data, function(key, value) {
-            $("#form_" + key).val(value);
-        });
+        update_setting(data);
     }).done(function(){
         $.getJSON( "./api/data/", function( data ) {
             for (var i = 0; i < data['time'].length; i++) {
@@ -68,12 +68,14 @@ $(function(){
     });
 
     $("#settings").submit(function( event ){
-        $.post( "./api/set/", $( "#settings" ).serialize(), function( data ) {
+        var daily_thermal_demand = "";
+        for(var i = 0; i < 24; i++) {
+            daily_thermal_demand += "&daily_thermal_demand_" + i + "=" + ($("#daily_thermal_demand_" + i).slider( "value")/10000);
+        }
+        $.post( "./api/set/", $( "#settings" ).serialize() + daily_thermal_demand, function( data ) {
             $("#settings_button").removeClass("btn-primary");
             $("#settings_button").addClass("btn-success");
-            $.each(data, function(key, value) {
-                $("#form_" + key).val(value);
-            });
+            update_setting(data);
             setTimeout(function(){
                 $("#settings_button").removeClass("btn-success");
                 $("#settings_button").addClass("btn-primary");
@@ -87,6 +89,18 @@ function refresh(){
     $.getJSON( "./api/data/", function( data ) {
         update_scheme(data);
         update_diagram(data);
+    });
+}
+
+function update_setting(data){
+    $.each(data, function(key, value) {
+        if(key == "daily_thermal_demand"){
+            $.each(value, function(index, hour_value) {
+                $("#daily_thermal_demand_" + index).slider( "value", hour_value * 10000);
+            });
+        }else{
+            $("#form_" + key).val(value);
+        }
     });
 }
 
@@ -115,6 +129,7 @@ function update_diagram(data){
         new_data[2].push([timestamp, data['hs_level'][i]]);
         new_data[3].push([timestamp, data['thermal_consumption'][i]]);
     };
+
     for (var i = new_data.length - 1; i >= 0; i--) {
         chart.series[i].setData(new_data[i], false);
     };
@@ -129,6 +144,20 @@ function format_date(date){
 
 function get_timestamp(string){
     return new Date(parseFloat(string) * 1000).getTime();
+}
+
+function initialize_daily_thermal_demand(){
+    for(var i = 0; i < 24; i++) {
+        $("#daily_thermal_demand").append("<span id='daily_thermal_demand_" + i + "' class='slider'></span>");
+    }
+    $( ".slider" ).slider({
+        value: 0,
+        min: 0,
+        max: 10000,
+        range: "min",
+        animate: true,
+        orientation: "vertical"
+    });
 }
 
 function initialize_diagram(){

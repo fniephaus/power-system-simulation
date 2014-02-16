@@ -73,7 +73,7 @@ def get_data():
 @crossdomain(origin='*')
 def get_settings():
     return jsonify({
-        'average_thermal_demand': thermal.average_demand,
+        'average_thermal_demand': thermal.base_demand,
         'varying_thermal_demand': thermal.varying_demand,
         'thermal_demand_noise': 1 if thermal.noise else 0,
         'hs_capacity': heat_storage.capacity,
@@ -84,6 +84,7 @@ def get_settings():
         'cu_noise': 1 if cu.noise else 0,
         'plb_max_gas_input': plb.max_gas_input,
         'sim_forward': '',
+        'daily_thermal_demand': thermal.daily_demand
     })
 
 
@@ -91,7 +92,7 @@ def get_settings():
 @crossdomain(origin='*')
 def set_data():
     if 'average_thermal_demand' in request.form:
-        thermal.average_demand = float(request.form['average_thermal_demand'])
+        thermal.base_demand = float(request.form['average_thermal_demand'])
     if 'varying_thermal_demand' in request.form:
         thermal.varying_demand = float(request.form['varying_thermal_demand'])
     if 'thermal_demand_noise' in request.form:
@@ -114,8 +115,18 @@ def set_data():
     if 'plb_max_gas_input' in request.form:
         plb.max_gas_input = float(request.form['plb_max_gas_input'])
 
+    daily_thermal_demand = []
+    for i in range(24):
+        key = 'daily_thermal_demand_' + str(i)
+        if key in request.form:
+            daily_thermal_demand.append(float(request.form[key]))
+    if len(daily_thermal_demand) == 24:
+        thermal.daily_demand = daily_thermal_demand
+
+
+
     return jsonify({
-        'average_thermal_demand': thermal.average_demand,
+        'average_thermal_demand': thermal.base_demand,
         'varying_thermal_demand': thermal.varying_demand,
         'thermal_demand_noise': 1 if thermal.noise else 0,
         'hs_capacity': heat_storage.capacity,
@@ -126,6 +137,7 @@ def set_data():
         'cu_noise': 1 if cu.noise else 0,
         'plb_max_gas_input': plb.max_gas_input,
         'sim_forward': '',
+        'daily_thermal_demand': thermal.daily_demand
     })
 
 

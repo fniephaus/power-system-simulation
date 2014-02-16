@@ -8,21 +8,23 @@ class ThermalConsumer():
         self.env = env
         self.heat_storage = heat_storage
 
-        self.average_demand = 20.0  # kW
+        self.base_demand = 20.0  # kW
         self.varying_demand = 10.0  # kW
-        self.noise = True
+        self.noise = False
 
         self.total_consumption = 0.0  # kWh
 
+        self.daily_demand = [50 / 350.0, 25 / 350.0, 10 / 350.0, 10 / 350.0, 5 / 350.0, 20 / 350.0, 250 / 350.0, 1, 320 / 350.0, 290 / 350.0, 280 / 350.0, 310 /
+                           350.0, 250 / 350.0, 230 / 350.0, 225 / 350.0, 160 / 350.0, 125 / 350.0, 160 / 350.0, 200 / 350.0, 220 / 350.0, 260 / 350.0, 130 / 350.0, 140 / 350.0, 120 / 350.0]
+
     def get_consumption(self, consider_consumed=False):
-        time_of_day = (self.env.now % (60.0 * 60 * 24)) / (60.0 * 60 * 24)
-        # calculate variation using sine function
-        variation = self.varying_demand * \
-            math.fabs(math.sin(time_of_day * math.pi))
-        current_consumption = self.average_demand + variation
+        time_of_day = (self.env.now % (3600 * 24)) / 3600
+        # calculate variation using daily demand
+        variation = self.daily_demand[time_of_day] * self.varying_demand
+        current_consumption = self.base_demand + variation
 
         if self.noise:
-            current_consumption += self.varying_demand * \
+            current_consumption += self.varying_demand / 4.0 * \
                 (random.random() - 0.5)
 
         if consider_consumed:
@@ -35,5 +37,5 @@ class ThermalConsumer():
             self.heat_storage.consume_energy(consumption)
             self.env.log('Thermal demand:', '%f kW' % consumption)
             self.env.log('HS level:', '%f kWh' %
-                self.heat_storage.energy_stored())
+                         self.heat_storage.energy_stored())
             yield self.env.timeout(3600)

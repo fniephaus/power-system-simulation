@@ -11,6 +11,9 @@
 
     <!-- Bootstrap core CSS -->
     <link href="./static/css/bootstrap.min.css" rel="stylesheet">
+     <!-- jQuery UI CSS core CSS -->
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+
     <!-- Custom styles -->
     <link href="./static/css/basic.css" rel="stylesheet">
 
@@ -87,15 +90,15 @@
                       </div>
                       <div class="col-sm-3">
                         <div class="form-group">
-                          <label class="control-label">Cu's Max Gas Input</label>
+                          <label class="control-label">CU's Max Gas Input</label>
                           <input type="text" id="form_cu_max_gas_input" name="cu_max_gas_input" class="form-control">
                         </div>
                         <div class="form-group">
-                          <label class="control-label">Cu's Minimal Workload</label>
+                          <label class="control-label">CU's Minimal Workload</label>
                           <input type="text" id="form_cu_minimal_workload" name="cu_minimal_workload" class="form-control">
                         </div>
                         <div class="form-group">
-                          <label class="control-label">Cu Noise</label>
+                          <label class="control-label">CU Noise</label>
                           <input type="text" id="form_cu_noise" name="cu_noise" class="form-control">
                         </div>
                       </div>
@@ -108,6 +111,12 @@
                           <label class="control-label">Forward Simulation</label>
                           <input type="text" id="form_sim_forward" name="sim_forward" class="form-control" placeholder="12 (in hours)">
                         </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <label class="control-label">Daily Thermal Demand</label>
+                        <div id="daily_thermal_demand"></div>
                       </div>
                     </div>
                     <div class="row">
@@ -128,6 +137,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="./static/js/jquery-1.10.2.min.js"></script>
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="./static/js/bootstrap.min.js"></script>
 
     <script src="./static/js/hs/highstock.js"></script>
