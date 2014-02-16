@@ -52,10 +52,11 @@ var series_data = [{
 $(function(){
     $.get( "./static/img/simulation.svg", function( data ) {
         var svg_item = document.importNode(data.documentElement,true);
-        $("#simulation_scheme").append(svg_item);
+        $("#simulation_setup").append(svg_item);
     }, "xml");
 
     initialize_daily_thermal_demand();
+    initialize_settings_panel();
 
     $.getJSON( "./api/settings/", function( data ) {
         update_setting(data);
@@ -101,7 +102,7 @@ $(function(){
 
 function refresh(){
     $.getJSON( "./api/data/", function( data ) {
-        update_scheme(data);
+        update_setup(data);
         update_diagram(data);
     });
 }
@@ -122,7 +123,7 @@ function update_setting(data){
     });
 }
 
-function update_scheme(data){
+function update_setup(data){
     $.each(data, function(key, value) {
         value = value[value.length-1];
         var item = $('#' + key);
@@ -176,7 +177,30 @@ function initialize_daily_thermal_demand(){
         max: 10000,
         range: "min",
         animate: true,
-        orientation: "vertical"
+        orientation: "vertical",
+        slide: function( event, ui ) {
+            var text = "(Current value: " + ui.value/100 + "%)";
+            if(ui.handle.parentElement.id.indexOf("thermal") > 0){
+                $( "#daily_thermal_demand_info" ).text( text );
+            }else{
+                $( "#daily_electrical_demand_info" ).text( text );
+            }
+        },
+        stop: function( event, ui ) {
+            $( "#daily_thermal_demand_info" ).text('');
+            $( "#daily_electrical_demand_info" ).text('');
+        }
+    });
+}
+
+function initialize_settings_panel(){
+    $('#settings_accordion').on('hide.bs.collapse', function () {
+        var chart = $('#simulation_diagram').highcharts();
+        chart.setSize(chart.width, 600, doAnimation = true);
+    });
+    $('#settings_accordion').on('show.bs.collapse', function () {
+        var chart = $('#simulation_diagram').highcharts();
+        chart.setSize(chart.width, 200, doAnimation = true);
     });
 }
 
@@ -209,16 +233,20 @@ function initialize_diagram(){
             }, {
                 count: 2,
                 type: 'week',
-                text: '2W'
+                text: '1W'
+            }, {
+                count: 1,
+                type: 'month',
+                text: '1M'
+            }, {
+                count: 6,
+                type: 'month',
+                text: '6M'
             }, {
                 type: 'all',
                 text: 'All'
             }],
             selected: 2
-        },
-        
-        title : {
-            text : 'Live simulation data'
         },
 
         yAxis: {

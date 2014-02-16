@@ -23,13 +23,13 @@ html, body {
 
 .daily_demand {
     height: 120px;
-    margin: 15px auto 0 auto;
+    margin: 20px auto 0 auto;
 }
 
 .daily_demand span {
     height: 100px;
     float: left;
-    margin: 0 5px;
+    margin: 0 4px;
 }
 
 .daily_demand span span {
