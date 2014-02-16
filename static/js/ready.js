@@ -236,7 +236,7 @@ function initialize_diagram(){
             }, {
                 count: 2,
                 type: 'week',
-                text: '1W'
+                text: '2W'
             }, {
                 count: 1,
                 type: 'month',
