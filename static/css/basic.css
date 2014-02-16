@@ -21,18 +21,18 @@ html, body {
     left: 0;
 }
 
-#daily_thermal_demand {
+.daily_demand {
     height: 120px;
     margin: 15px auto 0 auto;
 }
 
-#daily_thermal_demand span {
+.daily_demand span {
     height: 100px;
     float: left;
     margin: 0 5px;
 }
 
-#daily_thermal_demand span span {
+.daily_demand span span {
     font-size: 8px;
     position: relative;
     left: -5px;

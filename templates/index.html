@@ -62,8 +62,8 @@
                     <div class="row">
                       <div class="col-sm-3">
                         <div class="form-group">
-                          <label class="control-label">Average Thermal Demand</label>
-                          <input type="text" id="form_average_thermal_demand" name="average_thermal_demand" class="form-control">
+                          <label class="control-label">Base Thermal Demand</label>
+                          <input type="text" id="form_base_thermal_demand" name="base_thermal_demand" class="form-control">
                         </div>
                         <div class="form-group">
                           <label class="control-label">Varying Thermal Demand</label>
@@ -72,6 +72,24 @@
                         <div class="form-group">
                           <label class="control-label">Thermal Demand Noise</label>
                           <input type="text" id="form_thermal_demand_noise" name="thermal_demand_noise" class="form-control">
+                        </div>
+                        <div class="form-group">
+                          <label class="control-label">Forward Simulation</label>
+                          <input type="text" id="form_sim_forward" name="sim_forward" class="form-control" placeholder="12 (in hours)">
+                        </div>
+                      </div>
+                      <div class="col-sm-3">
+                        <div class="form-group">
+                          <label class="control-label">Base Electrical Demand</label>
+                          <input type="text" id="form_base_electrical_demand" name="base_electrical_demand" class="form-control">
+                        </div>
+                        <div class="form-group">
+                          <label class="control-label">Varying Electrical Demand</label>
+                          <input type="text" id="form_varying_electrical_demand" name="varying_electrical_demand" class="form-control">
+                        </div>
+                        <div class="form-group">
+                          <label class="control-label">Electrical Demand Noise</label>
+                          <input type="text" id="form_electrical_demand_noise" name="electrical_demand_noise" class="form-control">
                         </div>
                       </div>
                       <div class="col-sm-3">
@@ -101,22 +119,20 @@
                           <label class="control-label">CU Noise</label>
                           <input type="text" id="form_cu_noise" name="cu_noise" class="form-control">
                         </div>
-                      </div>
-                      <div class="col-sm-3">
                         <div class="form-group">
                           <label class="control-label">PLB's Max Gas Input</label>
                           <input type="text" id="form_plb_max_gas_input" name="plb_max_gas_input" class="form-control">
-                        </div>
-                        <div class="form-group">
-                          <label class="control-label">Forward Simulation</label>
-                          <input type="text" id="form_sim_forward" name="sim_forward" class="form-control" placeholder="12 (in hours)">
                         </div>
                       </div>
                     </div>
                     <div class="row">
                       <div class="col-lg-6">
                         <label class="control-label">Daily Thermal Demand</label>
-                        <div id="daily_thermal_demand"></div>
+                        <div id="daily_thermal_demand" class="daily_demand"></div>
+                      </div>
+                      <div class="col-lg-6">
+                        <label class="control-label">Daily Electrical Demand</label>
+                        <div id="daily_electrical_demand" class="daily_demand"></div>
                       </div>
                     </div>
                     <div class="row">

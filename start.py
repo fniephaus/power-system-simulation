@@ -8,21 +8,16 @@ from functools import update_wrapper
 from werkzeug.serving import run_simple
 app = Flask(__name__)
 
-from simulation import env, heat_storage, cu, plb, thermal
+from simulation import env, heat_storage, electrical_infeed, cu, plb, thermal_consumer, electrical_consumer
 
-CACHE_LIMIT = 24 * 30  # 30 days
+CACHE_LIMIT = 24 * 365  # 365 days
 
 time_values = collections.deque(maxlen=CACHE_LIMIT)
 cu_workload_values = collections.deque(maxlen=CACHE_LIMIT)
-cu_electrical_power_values = collections.deque(maxlen=CACHE_LIMIT)
-cu_thermal_power_values = collections.deque(maxlen=CACHE_LIMIT)
-cu_total_gas_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
 plb_workload_values = collections.deque(maxlen=CACHE_LIMIT)
-plb_thermal_power_values = collections.deque(maxlen=CACHE_LIMIT)
-plb_total_gas_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
 hs_level_values = collections.deque(maxlen=CACHE_LIMIT)
 thermal_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
-
+electrical_consumption_values = collections.deque(maxlen=CACHE_LIMIT)
 
 def crossdomain(origin=None):
     def decorator(f):
@@ -58,45 +53,41 @@ def get_data():
     return jsonify({
         'time': list(time_values),
         'cu_workload': list(cu_workload_values),
-        'cu_electrical_power': list(cu_electrical_power_values),
-        'cu_thermal_power': list(cu_thermal_power_values),
-        'cu_total_gas_consumption': list(cu_total_gas_consumption_values),
+        'cu_electrical_production': [round(cu.current_electrical_production, 2)],
+        'cu_thermal_production': [round(cu.current_thermal_production, 2)],
+        'cu_operating_costs': [round(cu.get_operating_costs(), 2)],
         'plb_workload': list(plb_workload_values),
-        'plb_thermal_power': list(plb_thermal_power_values),
-        'plb_total_gas_consumption': list(plb_total_gas_consumption_values),
+        'plb_thermal_production': [round(plb.current_thermal_production, 2)],
+        'plb_operating_costs': [round(plb.get_operating_costs(), 2)],
         'hs_level': list(hs_level_values),
-        'thermal_consumption': list(thermal_consumption_values)
+        'thermal_consumption': list(thermal_consumption_values),
+        'electrical_consumption': list(electrical_consumption_values),
+        'infeed_reward': [round(electrical_infeed.get_reward(), 2)],
+        'infeed_costs': [round(electrical_infeed.get_costs(), 2)]
     })
 
 
 @app.route('/api/settings/', methods=['GET'])
 @crossdomain(origin='*')
 def get_settings():
-    return jsonify({
-        'average_thermal_demand': thermal.base_demand,
-        'varying_thermal_demand': thermal.varying_demand,
-        'thermal_demand_noise': 1 if thermal.noise else 0,
-        'hs_capacity': heat_storage.capacity,
-        'hs_target_energy': heat_storage.target_energy,
-        'hs_undersupplied_threshold': heat_storage.undersupplied_threshold,
-        'cu_max_gas_input': cu.max_gas_input,
-        'cu_minimal_workload': cu.minimal_workload,
-        'cu_noise': 1 if cu.noise else 0,
-        'plb_max_gas_input': plb.max_gas_input,
-        'sim_forward': '',
-        'daily_thermal_demand': thermal.daily_demand
-    })
+    return jsonify(get_settings_json())
 
 
 @app.route('/api/set/', methods=['POST'])
 @crossdomain(origin='*')
 def set_data():
-    if 'average_thermal_demand' in request.form:
-        thermal.base_demand = float(request.form['average_thermal_demand'])
+    if 'base_thermal_demand' in request.form:
+        thermal_consumer.base_demand = float(request.form['base_thermal_demand'])
     if 'varying_thermal_demand' in request.form:
-        thermal.varying_demand = float(request.form['varying_thermal_demand'])
+        thermal_consumer.varying_demand = float(request.form['varying_thermal_demand'])
     if 'thermal_demand_noise' in request.form:
-        thermal.noise = request.form['thermal_demand_noise'] == "1"
+        thermal_consumer.noise = request.form['thermal_demand_noise'] == "1"
+    if 'base_electrical_demand' in request.form:
+        electrical_consumer.base_demand = float(request.form['base_electrical_demand'])
+    if 'varying_electrical_demand' in request.form:
+        electrical_consumer.varying_demand = float(request.form['varying_electrical_demand'])
+    if 'electrical_demand_noise' in request.form:
+        electrical_consumer.noise = request.form['electrical_demand_noise'] == "1"
     if 'hs_capacity' in request.form:
         heat_storage.capacity = float(request.form['hs_capacity'])
     if 'hs_target_energy' in request.form:
@@ -121,14 +112,27 @@ def set_data():
         if key in request.form:
             daily_thermal_demand.append(float(request.form[key]))
     if len(daily_thermal_demand) == 24:
-        thermal.daily_demand = daily_thermal_demand
+        thermal_consumer.daily_demand = daily_thermal_demand
+
+    daily_electrical_demand = []
+    for i in range(24):
+        key = 'daily_electrical_demand_' + str(i)
+        if key in request.form:
+            daily_electrical_demand.append(float(request.form[key]))
+    if len(daily_electrical_demand) == 24:
+        electrical_consumer.daily_demand = daily_electrical_demand
+
+    return jsonify(get_settings_json())
 
 
-
-    return jsonify({
-        'average_thermal_demand': thermal.base_demand,
-        'varying_thermal_demand': thermal.varying_demand,
-        'thermal_demand_noise': 1 if thermal.noise else 0,
+def get_settings_json():
+    return {
+        'base_thermal_demand': thermal_consumer.base_demand,
+        'varying_thermal_demand': thermal_consumer.varying_demand,
+        'thermal_demand_noise': 1 if thermal_consumer.noise else 0,
+        'base_electrical_demand': electrical_consumer.base_demand,
+        'varying_electrical_demand': electrical_consumer.varying_demand,
+        'electrical_demand_noise': 1 if electrical_consumer.noise else 0,
         'hs_capacity': heat_storage.capacity,
         'hs_target_energy': heat_storage.target_energy,
         'hs_undersupplied_threshold': heat_storage.undersupplied_threshold,
@@ -137,23 +141,17 @@ def set_data():
         'cu_noise': 1 if cu.noise else 0,
         'plb_max_gas_input': plb.max_gas_input,
         'sim_forward': '',
-        'daily_thermal_demand': thermal.daily_demand
-    })
-
+        'daily_thermal_demand': thermal_consumer.daily_demand,
+        'daily_electrical_demand': electrical_consumer.daily_demand
+    };
 
 def append_measurement():
     time_values.append(env.get_time())
-    cu_workload_values.append(round(cu.get_workload(), 2))
-    cu_electrical_power_values.append(round(cu.get_electrical_power(), 2))
-    cu_thermal_power_values.append(round(cu.get_thermal_power(), 2))
-    cu_total_gas_consumption_values.append(
-        round(cu.total_gas_consumption, 2))
-    plb_workload_values.append(round(plb.get_workload(), 2))
-    plb_thermal_power_values.append(round(plb.get_thermal_power(), 2))
-    plb_total_gas_consumption_values.append(
-        round(plb.total_gas_consumption, 2))
+    cu_workload_values.append(round(cu.workload, 2))
+    plb_workload_values.append(round(plb.workload, 2))
     hs_level_values.append(round(heat_storage.level(), 2))
-    thermal_consumption_values.append(round(thermal.get_consumption(), 2))
+    thermal_consumption_values.append(round(thermal_consumer.get_consumption(), 2))
+    electrical_consumption_values.append(round(electrical_consumer.get_consumption(), 2))
 
 if __name__ == '__main__':
     sim = Simulation(env)

@@ -1,13 +1,16 @@
 var systems_units = {
     cu_workload: '%',
-    cu_electrical_power: 'kW',
-    cu_thermal_power: 'kW',
-    cu_total_gas_consumption: 'kWh',
+    cu_electrical_production: 'kW',
+    cu_thermal_production: 'kW',
+    cu_operating_costs: 'Euro',
     hs_level: '%',
     plb_workload: '%',
-    plb_thermal_power: 'kW',
-    plb_total_gas_consumption: 'kWh',
-    thermal_consumption: 'kW'
+    plb_thermal_production: 'kW',
+    plb_operating_costs: 'Euro',
+    thermal_consumption: 'kW',
+    electrical_consumption: 'kW',
+    infeed_reward: 'Euro',
+    infeed_costs: 'Euro'
 };
 
 var series_data = [{
@@ -37,6 +40,13 @@ var series_data = [{
     tooltip: {
         valueSuffix: ' kW'
     }
+},
+{
+    name: 'electrical_consumption',
+    data: [],
+    tooltip: {
+        valueSuffix: ' kW'
+    }
 }];
 
 $(function(){
@@ -57,6 +67,7 @@ $(function(){
                 series_data[1]['data'].push([timestamp, parseFloat(data['plb_workload'][i])]);
                 series_data[2]['data'].push([timestamp, parseFloat(data['hs_level'][i])]);
                 series_data[3]['data'].push([timestamp, parseFloat(data['thermal_consumption'][i])]);
+                series_data[4]['data'].push([timestamp, parseFloat(data['electrical_consumption'][i])]);
             };
         }).done(function(){
             initialize_diagram();
@@ -68,11 +79,14 @@ $(function(){
     });
 
     $("#settings").submit(function( event ){
-        var daily_thermal_demand = "";
+        var post_data = $( "#settings" ).serialize();
         for(var i = 0; i < 24; i++) {
-            daily_thermal_demand += "&daily_thermal_demand_" + i + "=" + ($("#daily_thermal_demand_" + i).slider( "value")/10000);
+            post_data += "&daily_thermal_demand_" + i + "=" + ($("#daily_thermal_demand_" + i).slider( "value")/10000);
         }
-        $.post( "./api/set/", $( "#settings" ).serialize() + daily_thermal_demand, function( data ) {
+        for(var i = 0; i < 24; i++) {
+            post_data += "&daily_electrical_demand_" + i + "=" + ($("#daily_electrical_demand_" + i).slider( "value")/10000);
+        }
+        $.post( "./api/set/", post_data, function( data ) {
             $("#settings_button").removeClass("btn-primary");
             $("#settings_button").addClass("btn-success");
             update_setting(data);
@@ -98,6 +112,10 @@ function update_setting(data){
             $.each(value, function(index, hour_value) {
                 $("#daily_thermal_demand_" + index).slider( "value", hour_value * 10000);
             });
+        }else if(key == "daily_electrical_demand"){
+            $.each(value, function(index, hour_value) {
+                $("#daily_electrical_demand_" + index).slider( "value", hour_value * 10000);
+            });
         }else{
             $("#form_" + key).val(value);
         }
@@ -121,13 +139,14 @@ function update_scheme(data){
 function update_diagram(data){
     var chart = $('#simulation_diagram').highcharts();
 
-    new_data = [[], [], [], []];
+    new_data = [[], [], [], [], []];
     for (var i = 0; i < data['time'].length; i++) {
         var timestamp = get_timestamp(data['time'][i]);
         new_data[0].push([timestamp, data['cu_workload'][i]]);
         new_data[1].push([timestamp, data['plb_workload'][i]]);
         new_data[2].push([timestamp, data['hs_level'][i]]);
         new_data[3].push([timestamp, data['thermal_consumption'][i]]);
+        new_data[4].push([timestamp, data['electrical_consumption'][i]]);
     };
 
     for (var i = new_data.length - 1; i >= 0; i--) {
@@ -149,6 +168,7 @@ function get_timestamp(string){
 function initialize_daily_thermal_demand(){
     for(var i = 0; i < 24; i++) {
         $("#daily_thermal_demand").append("<span id='daily_thermal_demand_" + i + "' class='slider'><span>" + i + "</span></span>");
+        $("#daily_electrical_demand").append("<span id='daily_electrical_demand_" + i + "' class='slider'><span>" + i + "</span></span>");
     }
     $( ".slider" ).slider({
         value: 0,

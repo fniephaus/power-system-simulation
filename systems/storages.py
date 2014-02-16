@@ -1,3 +1,7 @@
+ELECTRICAL_REWARD_PER_KWH = 0.0541
+ELECTRICAL_COSTS_PER_KWH = 0.264
+
+
 class HeatStorage():
 
     def __init__(self, env):
@@ -28,3 +32,28 @@ class HeatStorage():
 
     def undersupplied(self):
         return self.energy_stored() < self.undersupplied_threshold
+
+
+class ElectricalInfeed():
+
+    def __init__(self):
+        self.total = 0.0  # kWh
+        self.total_purchased = 0  # kWh
+
+        self.energy_produced = 0.0  # kWh
+
+    def add_energy(self, energy):
+        self.energy_produced = energy
+
+    def consume_energy(self, energy):
+        if self.energy_produced < energy:
+            self.total_purchased += energy - self.energy_produced
+        self.total += self.energy_produced - energy
+
+        self.energy_produced = 0
+
+    def get_reward(self):
+        return self.total * ELECTRICAL_REWARD_PER_KWH
+
+    def get_costs(self):
+        return self.total_purchased * ELECTRICAL_COSTS_PER_KWH
