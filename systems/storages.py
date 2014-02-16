@@ -46,10 +46,11 @@ class ElectricalInfeed():
         self.energy_produced = energy
 
     def consume_energy(self, energy):
-        if self.energy_produced < energy:
-            self.total_purchased += energy - self.energy_produced
-        self.total += self.energy_produced - energy
-
+        balance = self.energy_produced - energy
+        if balance < 0:
+            self.total_purchased -= balance
+        else:
+            self.total += balance
         self.energy_produced = 0
 
     def get_reward(self):
