@@ -1,8 +1,5 @@
 import random
 
-# Basic
-
-
 class GasPoweredGenerator(object):
 
     def __init__(self, env):

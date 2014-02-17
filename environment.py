@@ -15,6 +15,7 @@ class ForwardableRealtimeEnvironment(RealtimeEnvironment):
         # quiet by default
         self.verbose = False
 
+        # time to forward
         self.forward = 0
 
         # function which gets called every step
