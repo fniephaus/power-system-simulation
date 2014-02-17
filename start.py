@@ -155,8 +155,7 @@ def append_measurement():
 
 if __name__ == '__main__':
     sim = Simulation(env)
-    if len(sys.argv) > 1:
-        env.verbose = True
+    env.verbose = len(sys.argv) > 1
     env.step_function = append_measurement
     sim.start()
     app.run(host="0.0.0.0", debug=True, port=7000, use_reloader=False)

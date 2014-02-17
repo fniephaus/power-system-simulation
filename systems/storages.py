@@ -1,7 +1,3 @@
-ELECTRICAL_REWARD_PER_KWH = 0.0541
-ELECTRICAL_COSTS_PER_KWH = 0.264
-
-
 class HeatStorage():
 
     def __init__(self, env):
@@ -37,6 +33,9 @@ class HeatStorage():
 class ElectricalInfeed():
 
     def __init__(self):
+        self.electrical_reward_per_kwh = 0.0541  # Euro
+        self.electrical_costs_per_kwh = 0.264  # Euro
+
         self.total = 0.0  # kWh
         self.total_purchased = 0  # kWh
 
@@ -47,6 +46,8 @@ class ElectricalInfeed():
 
     def consume_energy(self, energy):
         balance = self.energy_produced - energy
+        # purchase external electrical energy if more energy needed than
+        # produced
         if balance < 0:
             self.total_purchased -= balance
         else:
@@ -54,7 +55,7 @@ class ElectricalInfeed():
         self.energy_produced = 0
 
     def get_reward(self):
-        return self.total * ELECTRICAL_REWARD_PER_KWH
+        return self.total * self.electrical_reward_per_kwh
 
     def get_costs(self):
-        return self.total_purchased * ELECTRICAL_COSTS_PER_KWH
+        return self.total_purchased * self.electrical_costs_per_kwh

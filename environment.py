@@ -17,7 +17,7 @@ class ForwardableRealtimeEnvironment(RealtimeEnvironment):
 
         self.forward = 0
 
-        # function which gets called every step in forward mode
+        # function which gets called every step
         self.step_function = None
 
         self.last_step = self.now
